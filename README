@@ -1,0 +1,79 @@
+Allegro Video Capture
+---------------------
+
+A video capture module for Allegro.
+
+
+Description
+-----------
+
+Allegro Video Capture (AVC) is a small drop-in module for your Allegro programs
+that makes it easy to capture video without the need for external capture
+programs.
+
+AVC was created by T³ Software to streamline the creation of promotional videos
+for our new releases. Capturing video with external programs is cumbersome and
+the results are less than ideal unless the capture is performed on high-end
+hardware. We do our development on older and lower end hardware and would
+rather not invest in new hardware unnecessarily.
+
+
+How to Use AVC
+--------------
+
+AVC requires you to write your program in such a way that the logic will be
+identical each time it is run. Provided this is the case, you simply call:
+
+    bool avc_start_capture(ALLEGRO_DISPLAY * display,
+        const char * out_filename,
+        bool (*init_proc)(void * data),
+        bool (*logic_proc)(void * data),
+        void (*render_proc)(void * data),
+        int fps,
+        int flags,
+        void * data);
+
+Here is a rundown of the arguments:
+
+    display:
+
+        Your program's ALLEGRO_DISPLAY. The dimensions of the display determine
+        the dimensions of the outputted video file.
+
+    out_filename:
+
+        The name the outputted video file will be saved as.
+
+    init_proc:
+
+        This function will be called before each video rendering pass to set
+        things up for the logic to run. This function should set up all your
+        program's variables so that your logic will be identical on each run
+        through.
+
+        If init_proc() returns false, the capture process will not continue.
+
+    logic_proc:
+
+        Your program's logic function. For each pass of the capture,
+        logic_proc() will be called until it returns false.
+
+    render_proc:
+
+        Your program's render function. During the video capture pass, each
+        logic frame will produce an image using render_proc().
+
+    fps:
+
+        How many frames per second your program runs at.
+
+    flags:
+
+        Pass 0 for now as there are no flags. Maybe in a future version.
+
+    data:
+
+        Your program's data. This is passed back into init_proc(),
+        logic_proc(), and render_proc() on each call.
+
+AVC assumes your render_proc() does not change the target bitmap.

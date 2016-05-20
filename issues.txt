@@ -1,0 +1,22 @@
+Allegro Video Capture Issues
+----------------------------
+
+[ ]Implement audio capture.
+
+   [ ]Set a mixer post-process callback and start the audio capture pass when
+      the callback is called the first time.
+
+[ ]Finish implementing avc_encode_video().
+
+   [ ]Current implementation is a placeholder. Need to get mencoder installed
+      and get the options right.
+
+[ ]Create example programs.
+
+   [ ]Example programs should let user mess around a bit and replay their
+      actions with a keypress. A separate keypress should replay their actions
+      and record a video using AVC.
+
+   [ ]Probably need one example with audio and one without.
+
+[ ]Don't capture audio if audio add-on is not initialized.
