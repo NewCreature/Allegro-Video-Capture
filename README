@@ -76,4 +76,13 @@ Here is a rundown of the arguments:
         Your program's data. This is passed back into init_proc(),
         logic_proc(), and render_proc() on each call.
 
-AVC assumes your render_proc() does not change the target bitmap.
+AVC assumes your render_proc() does not change the target bitmap without
+restoring its previous state. This is most convenient if you are allowing
+Allegro to render to its default target. You can still render things to bitmaps
+for effects and such as long as you restore ALLEGRO_STATE_TARGET_BITMAP when
+you're done.
+
+If you are going to change the target bitmap you _must_ store
+ALLEGRO_STATE_TARGET_BITMAP before you do and restore it _before_ rendering to
+the backbuffer. AVC sets the target to a temporary bitmap and it needs your
+render_proc() to render to that in order to capture the video.
