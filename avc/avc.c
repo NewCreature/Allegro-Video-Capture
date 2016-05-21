@@ -1,4 +1,5 @@
 #include <allegro5/allegro5.h>
+#include <allegro5/allegro_audio.h>
 
 /* Runs the mencoder command to encode our video frames and audio into the
    final output video file. */
@@ -56,6 +57,27 @@ static bool avc_capture_video(
     return true;
 }
 
+static int avc_audio_ticker = 0;
+static ALLEGRO_FILE * avc_audio_output_file = NULL;
+
+static void avc_audio_mixer_callback(void * buf, unsigned int samples, void * data)
+{
+	avc_audio_ticker++;
+    int sample;
+    int i;
+    float * p = (float *)buf;
+
+    /* record audio data after ticker reaches 2 */
+    if(avc_audio_ticker >= 2)
+    {
+        for(i = 0; i < samples; i++)
+        {
+            sample = p[i] * (65536 / 2);
+            al_fwrite32le(avc_audio_output_file, sample);
+        }
+    }
+}
+
 /* Run logic_proc() at fps frequency until it returns false, capturing audio to
    a WAV file. */
 static bool avc_capture_audio(
@@ -68,6 +90,7 @@ static bool avc_capture_audio(
     ALLEGRO_EVENT_QUEUE * event_queue = NULL;
     ALLEGRO_TIMER * logic_timer = NULL;
     ALLEGRO_EVENT event;
+    ALLEGRO_PATH * path;
 
     event_queue = al_create_event_queue();
     if(!event_queue)
@@ -81,6 +104,28 @@ static bool avc_capture_audio(
         return false;
     }
 
+    /* open output file */
+    path = al_create_path(fn);
+    if(!path)
+    {
+        return false;
+    }
+    al_set_path_filename(path, "audio.wav");
+    avc_audio_output_file = al_fopen(al_path_cstr(path, '/'), "wb");
+    al_destroy_path(path);
+
+    /* don't start audio capture until our mixer callback is called */
+    avc_audio_ticker = 0;
+    while(avc_audio_ticker < 2)
+    {
+        if(avc_audio_ticker == 0)
+        {
+            al_set_mixer_postprocess_callback(al_get_default_mixer(), avc_audio_mixer_callback, data);
+            avc_audio_ticker++;
+        }
+    }
+
+    /* run the logic until it returns false */
     al_register_event_source(event_queue, al_get_timer_event_source(logic_timer));
     al_start_timer(logic_timer);
     while(1)
@@ -91,8 +136,13 @@ static bool avc_capture_audio(
             break;
         }
     }
+
+    /* clean up */
+    al_set_mixer_postprocess_callback(al_get_default_mixer(), NULL, NULL);
     al_destroy_timer(logic_timer);
     al_destroy_event_queue(event_queue);
+    al_fclose(avc_audio_output_file);
+
     return true;
 }
 
