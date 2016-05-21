@@ -63,16 +63,24 @@ static ALLEGRO_FILE * avc_audio_output_file = NULL;
 static void avc_audio_mixer_callback(void * buf, unsigned int samples, void * data)
 {
 	avc_audio_ticker++;
-    int sample;
+    long sample;
     int i;
     float * p = (float *)buf;
 
     /* record audio data after ticker reaches 2 */
     if(avc_audio_ticker >= 2)
     {
-        for(i = 0; i < samples; i++)
+        for(i = 0; i < samples * 2; i++)
         {
-            sample = p[i] * (65536 / 2);
+            sample = p[i] * 32768;
+            if(sample > 32767)
+            {
+                sample = 32767;
+            }
+            else if(sample < -32768)
+            {
+                sample = -32768;
+            }
             al_fwrite32le(avc_audio_output_file, sample);
         }
     }
@@ -98,7 +106,7 @@ static bool avc_capture_audio(
         return false;
     }
 
-    logic_timer = al_create_timer((float)fps / 60.0);
+    logic_timer = al_create_timer(1.0 / (float)fps);
     if(!logic_timer)
     {
         return false;
