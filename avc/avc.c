@@ -14,7 +14,7 @@ static bool avc_encode_video(const char * fn, int fps)
         return false;
     }
     al_set_path_filename(path, "");
-    snprintf(sys_command, 1024, "mencoder %s/img_*.png -oac mp3lame -ovc x264 -fps %d -vf harddup -audiofile %s/audio.wav -o %s", al_path_cstr(path, '/'), fps, al_path_cstr(path, '/'), fn);
+    snprintf(sys_command, 1024, "mencoder %s/img_*.png -oac mp3lame -ovc x264 -ofps %d -audiofile %s/audio.wav -o %s", al_path_cstr(path, '/'), fps, al_path_cstr(path, '/'), fn);
 
     return true;
 }
