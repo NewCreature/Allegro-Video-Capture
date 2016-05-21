@@ -19,6 +19,24 @@ static bool avc_encode_video(const char * fn, int fps)
     return true;
 }
 
+static void avc_draw_captured_frame(ALLEGRO_DISPLAY * dp, ALLEGRO_BITMAP * bp)
+{
+    ALLEGRO_TRANSFORM identity;
+    ALLEGRO_STATE old_state;
+    int x, y, w, h;
+
+    al_store_state(&old_state, ALLEGRO_STATE_TRANSFORM | ALLEGRO_STATE_TARGET_BITMAP);
+    al_set_target_backbuffer(dp);
+    al_identity_transform(&identity);
+    al_use_transform(&identity);
+    al_get_clipping_rectangle(&x, &y, &w, &h);
+    al_reset_clipping_rectangle();
+    al_draw_bitmap(bp, 0, 0, 0);
+    al_set_clipping_rectangle(x, y, w, h);
+    al_restore_state(&old_state);
+    al_flip_display();
+}
+
 /* Run logic_proc() until it returns false, rendering each frame with
    rener_proc() and saving the output to sequentially named image files. */
 static bool avc_capture_video(
@@ -47,7 +65,8 @@ static bool avc_capture_video(
     while(logic_proc(data))
     {
         render_proc(data);
-        snprintf(out_fn, 1024, "img_%7d.png", frame);
+        snprintf(out_fn, 1024, "img_%07d.png", frame);
+        avc_draw_captured_frame(dp, buffer);
         al_save_bitmap(out_fn, buffer);
         frame++;
     }
