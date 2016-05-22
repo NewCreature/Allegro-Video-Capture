@@ -18,6 +18,13 @@ hardware. We do our development on older and lower end hardware and would
 rather not invest in new hardware unnecessarily.
 
 
+Requirements
+------------
+
+AVC relies on FFmpeg being installed in order to be able to encode video. You
+need to have a copy of FFmpeg with libx264 and mp3lame support.
+
+
 How to Use AVC
 --------------
 
